@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Rekap Jemputan Ojeg Realtime</title>
+    <title>Catatan Jemputan Sekolah</title>
 
-    <!-- Import Firebase SDK (v9/v10 Compat) -->
+    <!-- Import Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -24,12 +24,15 @@
         .tab-content { display: none; flex-direction: column; }
         .tab-content.active { display: flex; }
 
-        .config-panel { background-color: #e8f4fd; border: 1px solid #b6e0fe; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 0.85em; }
+        .config-panel { background-color: #e8f4fd; border: 1px solid #b6e0fe; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; font-size: 0.85em; }
         .config-group { display: flex; align-items: center; gap: 5px; }
         .config-group label { font-weight: bold; white-space: nowrap; }
         .config-group input { width: 100%; padding: 4px 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
 
-        .table-container { max-height: 380px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; }
+        .btn-simpan { background-color: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; grid-column: 1 / -1; }
+        .btn-simpan:hover { background-color: #2980b9; }
+
+        .table-container { max-height: 480px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85em; white-space: nowrap; }
         th, td { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 4px 8px; text-align: center; vertical-align: middle; background-color: #fff; }
         th { background-color: #3498db; color: white; position: sticky; top: 0; z-index: 10; padding: 6px 8px; border-top: 1px solid #ddd; }
@@ -53,7 +56,7 @@
 <body>
 
 <div class="card">
-    <h2>Catatan Jemputan Ojeg</h2>
+    <h2>Catatan Jemputan Sekolah</h2>
     <div id="conn-status" class="status-badge">Menghubungkan ke Database...</div>
     
     <div class="tabs">
@@ -66,14 +69,15 @@
         <div class="config-panel">
             <div class="config-group">
                 <label>Siswa 1:</label>
-                <input type="text" id="nama-a" value="Siswa A" onchange="simpanKonfigurasi()" placeholder="Nama A">
-                <input type="number" id="tarif-a" value="5000" onchange="simpanKonfigurasi()" placeholder="Tarif A">
+                <input type="text" id="nama-a" value="" placeholder="Nama Siswa">
+                <input type="number" id="tarif-a" value="" placeholder="Biaya">
             </div>
             <div class="config-group">
                 <label>Siswa 2:</label>
-                <input type="text" id="nama-b" value="Siswa B" onchange="simpanKonfigurasi()" placeholder="Nama B">
-                <input type="number" id="tarif-b" value="12000" onchange="simpanKonfigurasi()" placeholder="Tarif B">
+                <input type="text" id="nama-b" value="" placeholder="Nama Siswa">
+                <input type="number" id="tarif-b" value="" placeholder="Biaya">
             </div>
+            <button class="btn-simpan" onclick="simpanKonfigurasi()">Simpan</button>
         </div>
 
         <div style="text-align:center; font-weight:bold; color:#7f8c8d; margin-bottom:8px; font-size: 0.9em;" id="nama-bulan"></div>
@@ -117,9 +121,6 @@
 </div>
 
 <script>
-    // -------------------------------------------------------------
-    // PASTE KONFIGURASI FIREBASE ANDA DI SINI
-    // -------------------------------------------------------------
     const firebaseConfig = {
         apiKey: "AIzaSyCZg8n_xutoukbDq0infkgKeceG6-rxhJE",
         authDomain: "abudemen-aa.firebaseapp.com",
@@ -130,11 +131,9 @@
         appId: "1:773709057684:web:14d40249d27eea123b2e81"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Indikator Status Koneksi Realtime
     db.ref('.info/connected').on('value', (snap) => {
         const badge = document.getElementById('conn-status');
         if (snap.val() === true) {
@@ -156,10 +155,10 @@
 
     document.getElementById('nama-bulan').innerText = `Bulan: ${namaBulan[bulan]} ${tahun}`;
 
-    // Render Baris Tabel Harian
     const jumlahHari = new Date(tahun, bulan + 1, 0).getDate();
     const tbody = document.getElementById('tabel-body');
 
+    // Generate Baris Tabel
     for (let i = 1; i <= jumlahHari; i++) {
         const objTanggal = new Date(tahun, bulan, i);
         const dayOfWeek = objTanggal.getDay();
@@ -175,14 +174,14 @@
             <td>
                 ${isHariMinggu 
                     ? '<span style="color:#e74c3c;">-</span>' 
-                    : `<label class="chk-label"><input type="checkbox" id="chk-a-${i}" class="chk-a" onchange="kirimDataHari(${i})"><span class="lbl-a">A</span></label>
-                       <label class="chk-label"><input type="checkbox" id="chk-b-${i}" class="chk-b" onchange="kirimDataHari(${i})"><span class="lbl-b">B</span></label>`
+                    : `<label class="chk-label"><input type="checkbox" id="chk-a-${i}" class="chk-a" onchange="ubahCentang(${i})"><span class="lbl-a">A</span></label>
+                       <label class="chk-label"><input type="checkbox" id="chk-b-${i}" class="chk-b" onchange="ubahCentang(${i})"><span class="lbl-b">B</span></label>`
                 }
             </td>
             <td>
                 ${isHariMinggu 
                     ? '<span style="color:#e74c3c;">-</span>' 
-                    : 'Rp <span id="subtotal-${i}" class="subtotal-hari">0</span>'
+                    : 'Rp <span id="subtotal-' + i + '">0</span>'
                 }
             </td>
             <td>
@@ -192,10 +191,13 @@
         tbody.appendChild(tr);
     }
 
-    // --- FUNGSI HITUNG TOTAL & SUBTOTAL (DIPERBAIKI) ---
+    // Fungsi Utama Kalkulasi Total & Subtotal
     function hitungTotalLokal() {
-        const tarifA = parseInt(document.getElementById('tarif-a').value) || 0;
-        const tarifB = parseInt(document.getElementById('tarif-b').value) || 0;
+        const valA = document.getElementById('tarif-a').value;
+        const valB = document.getElementById('tarif-b').value;
+
+        const tarifA = parseInt(valA) > 0 ? parseInt(valA) : 0;
+        const tarifB = parseInt(valB) > 0 ? parseInt(valB) : 0;
 
         let grandTotal = 0;
 
@@ -204,10 +206,10 @@
             const chkB = document.getElementById(`chk-b-${i}`);
             const subtotalSpan = document.getElementById(`subtotal-${i}`);
 
-            if (chkA && chkB && subtotalSpan) {
+            if (subtotalSpan) {
                 let harian = 0;
-                if (chkA.checked) harian += tarifA;
-                if (chkB.checked) harian += tarifB;
+                if (chkA && chkA.checked) harian += tarifA;
+                if (chkB && chkB.checked) harian += tarifB;
 
                 subtotalSpan.innerText = harian.toLocaleString('id-ID');
                 grandTotal += harian;
@@ -218,49 +220,51 @@
         updateRiwayatBulanIni(grandTotal);
     }
 
-    // Simpan Pengaturan Nama & Tarif ke Firebase
-    function simpanKonfigurasi() {
-        const configData = {
-            namaA: document.getElementById('nama-a').value || 'A',
-            tarifA: parseInt(document.getElementById('tarif-a').value) || 0,
-            namaB: document.getElementById('nama-b').value || 'B',
-            tarifB: parseInt(document.getElementById('tarif-b').value) || 0
-        };
-        db.ref('config').set(configData);
+    function ubahCentang(tgl) {
+        kirimDataHari(tgl);
+        hitungTotalLokal();
     }
 
-    // Kirim Data Centangan/Keterangan Harian ke Firebase saat diubah
+    function simpanKonfigurasi() {
+        const configData = {
+            namaA: document.getElementById('nama-a').value || 'Siswa A',
+            tarifA: parseInt(document.getElementById('tarif-a').value) || 5000,
+            namaB: document.getElementById('nama-b').value || 'Siswa B',
+            tarifB: parseInt(document.getElementById('tarif-b').value) || 12000
+        };
+        db.ref('config').set(configData);
+        alert('Pengaturan Nama & Tarif Berhasil Disimpan!');
+        hitungTotalLokal();
+    }
+
     function kirimDataHari(tgl) {
         const chkA = document.getElementById(`chk-a-${tgl}`);
         const chkB = document.getElementById(`chk-b-${tgl}`);
         const ket = document.getElementById(`ket-${tgl}`);
 
-        if (chkA && chkB) {
-            db.ref(`${pathBulanIni}/tgl_${tgl}`).set({
-                a: chkA.checked,
-                b: chkB.checked,
-                ket: ket.value || ''
-            });
-        }
+        db.ref(`${pathBulanIni}/tgl_${tgl}`).set({
+            a: chkA ? chkA.checked : false,
+            b: chkB ? chkB.checked : false,
+            ket: ket ? (ket.value || '') : ''
+        });
     }
 
-    // Listen Pengaturan (Nama & Tarif) dari Firebase
+    // Load Config dari Firebase
     db.ref('config').on('value', (snap) => {
         const val = snap.val();
         if (val) {
-            document.getElementById('nama-a').value = val.namaA;
-            document.getElementById('tarif-a').value = val.tarifA;
-            document.getElementById('nama-b').value = val.namaB;
-            document.getElementById('tarif-b').value = val.tarifB;
+            document.getElementById('nama-a').value = val.namaA || 'Siswa A';
+            document.getElementById('tarif-a').value = val.tarifA || 5000;
+            document.getElementById('nama-b').value = val.namaB || 'Siswa B';
+            document.getElementById('tarif-b').value = val.tarifB || 12000;
 
-            document.querySelectorAll('.lbl-a').forEach(el => el.innerText = val.namaA);
-            document.querySelectorAll('.lbl-b').forEach(el => el.innerText = val.namaB);
-            
-            hitungTotalLokal();
+            document.querySelectorAll('.lbl-a').forEach(el => el.innerText = val.namaA || 'Siswa A');
+            document.querySelectorAll('.lbl-b').forEach(el => el.innerText = val.namaB || 'Siswa B');
         }
+        hitungTotalLokal();
     });
 
-    // Listen Data Absensi Harian dari Firebase
+    // Load Data Harian dari Firebase Realtime
     db.ref(pathBulanIni).on('value', (snap) => {
         const dataBulan = snap.val() || {};
         for (let i = 1; i <= jumlahHari; i++) {
@@ -275,12 +279,9 @@
                 if (ket) ket.value = dataTgl ? (dataTgl.ket || '') : '';
             }
         }
-        
-        // Jalankan kalkulasi subtotal setelah centangan di-update
         hitungTotalLokal();
     });
 
-    // Navigasi Tab
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
@@ -288,7 +289,6 @@
         btn.classList.add('active');
     }
 
-    // Init Tab Riwayat
     function initRiwayat() {
         const tbodyRiwayat = document.getElementById('tabel-riwayat-body');
         tbodyRiwayat.innerHTML = '';
@@ -335,7 +335,7 @@
         db.ref(`riwayat/${keyPath}`).set(chk.checked);
     }
 
-    // Inisialisasi
+    // Inisialisasi awal
     initRiwayat();
     hitungTotalLokal();
 </script>
