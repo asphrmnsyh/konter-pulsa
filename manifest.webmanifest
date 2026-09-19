@@ -1,18 +1,19 @@
 {
+  "id": "./",
   "name": "KonterKu - Kasir Pulsa & PPOB Offline",
   "short_name": "KonterKu",
   "description": "Aplikasi POS kasir toko pulsa, kuota data, PLN, e-wallet & PPOB offline",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone", "window-controls-overlay"],
+  "lang": "id-ID",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0284c7",
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "192x192 512x512",
+      "src": "./icon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
