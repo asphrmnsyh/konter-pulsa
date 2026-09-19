@@ -2,7 +2,7 @@
   "name": "KonterKu - Kasir Pulsa & PPOB Offline",
   "short_name": "KonterKu",
   "description": "Aplikasi POS kasir toko pulsa, kuota data, PLN, e-wallet & PPOB offline",
-  "start_url": "/konter-pulsa/",
+  "start_url": "/",
   "scope": "/",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone", "window-controls-overlay"],
